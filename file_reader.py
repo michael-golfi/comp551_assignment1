@@ -37,7 +37,7 @@ def checkDivision(age, gender):
 		return ('M: ' + age_group)
 	else:
 		return ('F: ' + age_group)
-
+# make sure to change the full path
 with open('/Users/ralphbousamra/Desktop/Project1_data.csv', newline='') as csvfile:
 	spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
 	spamreader.__next__()
