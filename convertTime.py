@@ -11,7 +11,5 @@ def get_sec(time_str):
 	return int(h) * 3600 + int(m) * 60 + int(s)
 
 df = pd.read_csv('data/data.csv')
-#df['Time'].apply(get_sec, axis=1, broadcast=False, raw=False, reduce=None)
 df['Time'] = df['Time'].apply(get_sec)
-
 df.to_csv('data/data.csv')
