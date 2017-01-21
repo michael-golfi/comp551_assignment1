@@ -29,3 +29,6 @@ def init_pandas(pd):
     pd.DataFrame.not_equals = not_equals
     pd.DataFrame.convert_time = convert_time
     pd.DataFrame.cut = cut
+
+def save_groups(basePath, groups):
+    [g.to_csv("{0}{1}.csv".format(basePath, k)) for (k,g) in groups]

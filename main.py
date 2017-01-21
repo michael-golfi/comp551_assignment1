@@ -1,22 +1,17 @@
 """
-
 COMP 551 - Assignment 1
 Marathon Analysis
 
 Data taken from:
 https://www.athlinks.com/Events/383053/Courses/570971/
 
-
 Authors:
     Michael Golfi <michael.golfi@mail.mcgill.ca>
     Ralph Bou-Samra <ralph.bou-samra@mcgill.ca>
     Sneha Desai <sneha.desai@mail.mcgill.ca>
 
-License: MIT
-
 Columns:
     Id Age Category Sex  Rank     Time   Pace  Year
-
 """
 
 import pandas as pd
@@ -24,7 +19,7 @@ import numpy as np
 import helpers
 
 FILENAME = "data/Project1_data.csv"
-OUTPUT_NAME = "data/output.csv"
+OUTPUT_BASE = "output/"
 Id = "Id"
 NAME = "Name"
 AGE = "Age Category"
@@ -42,11 +37,6 @@ df = pd.read_csv(FILENAME) \
     .convert_time() \
     .cut(AGE, AGE_BINS)
 
-df
-
 group = df.groupby([AGE])
-group
 
-print [i for i in group]
-
-df.to_csv(OUTPUT_NAME)
+helpers.save_groups(OUTPUT_BASE, group)
