@@ -6,33 +6,47 @@ Marathon Analysis
 Data taken from:
 https://www.athlinks.com/Events/383053/Courses/570971/
 
-"""
 
-# Authors: Michael Golfi <michael.golfi@mail.mcgill.ca>, Ralph Bou-Samra <ralph.bou-samra@mcgill.ca> Sneha Desai <sneha.desai@mail.mcgill.ca>
-# License: MIT
+Authors:
+    Michael Golfi <michael.golfi@mail.mcgill.ca>
+    Ralph Bou-Samra <ralph.bou-samra@mcgill.ca>
+    Sneha Desai <sneha.desai@mail.mcgill.ca>
+
+License: MIT
+
+Columns:
+    Id Age Category Sex  Rank     Time   Pace  Year
+
+"""
 
 import pandas as pd
 import numpy as np
+import helpers
 
-def init_print():
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
+FILENAME = "data/Project1_data.csv"
+OUTPUT_NAME = "data/output.csv"
+Id = "Id"
+NAME = "Name"
+AGE = "Age Category"
+SEX = "Sex"
+YEAR = "Year"
+AGE_BINS = [11, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]
 
-def print_groupby(grouped):
-    for key, item in grouped:
-        print key
-        print grouped.get_group(key), "\n"
+helpers.init_pandas(pd)
 
-init_print()
+# Preprocessing
+# Remove Unknown genders, convert time to seconds and remove years earlier than 2007
+df = pd.read_csv(FILENAME) \
+    .greater_than(YEAR, 2007) \
+    .not_equals(SEX, "U") \
+    .convert_time() \
+    .cut(AGE, AGE_BINS)
 
-ageCategories = [11, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]
-df = pd.read_csv('data/data.csv')
-del df["Name"]
-df["Age Category"] = pd.cut(df['Age Category'], 
-    bins=ageCategories, 
-    include_lowest=True, 
-    right=False)
+df
 
-grouped = df.groupby(['Age Category', 'Sex'])
+group = df.groupby([AGE])
+group
 
-print_groupby(grouped)
+print [i for i in group]
+
+df.to_csv(OUTPUT_NAME)
