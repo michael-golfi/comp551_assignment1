@@ -12,25 +12,19 @@ def init_pandas(pd, np):
         def get_sec(time_str):
             h, m, s = time_str.split(':')
             return int(h) * 3600 + int(m) * 60 + int(s)
-        def get_sec_pace(time_str):
-            m, s = time_str.split(':')
-            return int(m) * 60 + int(s)
-
         df['Time'] = df['Time'].apply(get_sec)
-        df['Pace'] = df['Pace'].apply(get_sec_pace)
         return df
 
     def cut(df, key, bins):
         df[key] = pd.cut(df[key], bins=bins, include_lowest=True, right=False)
         return df
 
-    def remove_duplicate_runners(df):
+    def remove_duplicate_runners(df, cols):
         df = df \
             .groupby(["Year", "Id", "Name", "Age Category", "Sex"]) \
-            .agg({'Rank': np.mean,'Time': np.mean,'Pace': np.mean}) \
+            .agg({'Rank': np.mean,'Time': np.mean}) \
             .reset_index()
-        df = df[["Id", "Name", "Age Category", "Sex", "Pace", "Rank", "Time", "Year"]]
-        return df
+        return df[cols]
 
     pd.DataFrame.equals = equals
     pd.DataFrame.greater_than = greater_than

@@ -11,7 +11,7 @@ Authors:
     Sneha Desai <sneha.desai@mail.mcgill.ca>
 
 Columns:
-    Id Age Category Sex  Rank     Time   Pace  Year
+    Id Name Age Category Sex Rank Time Year
 """
 
 import pandas as pd
@@ -24,20 +24,21 @@ Id = "Id"
 NAME = "Name"
 AGE = "Age Category"
 SEX = "Sex"
+RANK = "Rank"
+TIME = "Time"
 YEAR = "Year"
 AGE_BINS = [11, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]
+COLS = [Id, NAME, AGE, SEX, RANK, TIME, YEAR]
 
 helpers.init_pandas(pd, np)
 
 # Preprocessing
 # Remove Unknown genders, convert time to seconds and remove years earlier than 2007
-df = pd.read_csv(FILENAME) \
+df = pd.read_csv(FILENAME, usecols=COLS) \
     .greater_than(YEAR, 2007) \
     .not_equals(SEX, "U") \
     .convert_time() \
     .cut(AGE, AGE_BINS) \
-    .remove_duplicate_runners()
+    .remove_duplicate_runners(COLS)
 
-group = df.groupby([AGE])
-
-helpers.save_groups(OUTPUT_BASE, group)
+helpers.save_groups(OUTPUT_BASE, df.groupby([AGE]))
