@@ -17,7 +17,7 @@ Columns:
 import pandas as pd
 import numpy as np
 import helpers
-
+ 
 FILENAME = "data/Project1_data.csv"
 OUTPUT_BASE = "output/"
 Id = "Id"
@@ -41,5 +41,7 @@ df = pd.read_csv(FILENAME, usecols=COLS) \
     .convert_time() \
     .cut(AGE, AGE_BINS) \
     .remove_duplicate_runners(COLS)
+
+print df[YEAR].value_counts()
 
 helpers.save_groups(OUTPUT_BASE, df.groupby([AGE]))
