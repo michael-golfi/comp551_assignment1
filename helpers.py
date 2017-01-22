@@ -21,7 +21,7 @@ def init_pandas(pd, np):
 
     def remove_duplicate_runners(df, cols):
         df = df \
-            .groupby(["Year", "Id", "Name", "Age Category", "Sex"]) \
+            .groupby(["Year", "Id", "Age Category", "Sex"]) \
             .agg({'Rank': np.mean,'Time': np.mean}) \
             .reset_index()
         return df[cols]
