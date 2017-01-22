@@ -27,7 +27,7 @@ SEX = "Sex"
 YEAR = "Year"
 AGE_BINS = [11, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]
 
-helpers.init_pandas(pd)
+helpers.init_pandas(pd, np)
 
 # Preprocessing
 # Remove Unknown genders, convert time to seconds and remove years earlier than 2007
@@ -35,7 +35,8 @@ df = pd.read_csv(FILENAME) \
     .greater_than(YEAR, 2007) \
     .not_equals(SEX, "U") \
     .convert_time() \
-    .cut(AGE, AGE_BINS)
+    .cut(AGE, AGE_BINS) \
+    .remove_duplicate_runners()
 
 group = df.groupby([AGE])
 
