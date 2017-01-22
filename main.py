@@ -28,6 +28,7 @@ TIME = "Time"
 YEAR = "Year"
 AGE_BINS = [11, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]
 COLS = [Id, AGE, SEX, RANK, TIME, YEAR]
+TRAINING_THRESHOLD = 0.7
 
 helpers.init_pandas(pd, np)
 
@@ -40,14 +41,21 @@ df = pd.read_csv(FILENAME, usecols=COLS) \
     .cut(AGE, AGE_BINS) \
     .remove_duplicate_runners(COLS)
 
-print df[YEAR].value_counts()
-
 # Save output
 helpers.save_groups(OUTPUT_BASE, df.groupby([AGE]))
 
 """ 
 Questions:
     a. Predict Y1 using logistic regression, optimized with gradient descent.
-    b. Predict Y1 using a Naïve Bayes classifier.
+    b. Predict Y1 using a Naive Bayes classifier.
     c. Predict Y2 using linear regression, optimized in closed-form or with gradient descent (with or without regularization).
 """
+
+# Pivot table to list participants and years participated
+df["Participated"] = df[RANK].apply(lambda x: not np.isnan(x))
+pivot = df.pivot_table(index=[Id], columns=[YEAR], values="Participated")
+
+# Split data into training and eval
+cutoff = np.random.rand(len(pivot)) < TRAINING_THRESHOLD
+train = pivot[cutoff]
+test = pivot[~cutoff]
