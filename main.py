@@ -15,6 +15,7 @@ Columns:
 """
 
 import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
 import helpers
  
@@ -26,6 +27,7 @@ SEX = "Sex"
 RANK = "Rank"
 TIME = "Time"
 YEAR = "Year"
+PARTICIPATED = "Participated"
 AGE_BINS = [11, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]
 COLS = [Id, AGE, SEX, RANK, TIME, YEAR]
 TRAINING_THRESHOLD = 0.7
@@ -42,7 +44,8 @@ df = pd.read_csv(FILENAME, usecols=COLS) \
     .remove_duplicate_runners(COLS)
 
 # Save output
-helpers.save_groups(OUTPUT_BASE, df.groupby([AGE]))
+#df.to_excel(OUTPUT_BASE + "output.xlsx")
+#helpers.save_groups(OUTPUT_BASE, df.groupby([AGE]))
 
 """ 
 Questions:
@@ -52,10 +55,41 @@ Questions:
 """
 
 # Pivot table to list participants and years participated
-df["Participated"] = df[RANK].apply(lambda x: not np.isnan(x))
-pivot = df.pivot_table(index=[Id], columns=[YEAR], values="Participated")
+df[PARTICIPATED] = df[RANK].apply(lambda x: 1)
+pivot = df.pivot_table(index=[Id], columns=[YEAR], values=PARTICIPATED, fill_value=0)
+dedupes = df.groupby([Id]).last()
+avgRank = df.groupby([Id]).apply(lambda x: x[RANK].mean())
+
+pivot[AGE] = dedupes[AGE]
+pivot[SEX] = dedupes[SEX]
+pivot["MeanRank"] = avgRank.values
+
+pivot = pivot[[SEX, AGE, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, "MeanRank"]]
+
+def addLastRace(pivotTable):
+    lastYears = []
+    for record in pivotTable.iterrows():
+        lastYear = 0
+        
+        # Start from 2015 down since we need to test for 2016
+        for year in [2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008]:
+            if record[1].loc[year] == 1:
+                break
+            lastYear=lastYear+1
+        lastYears.append(lastYear)
+    pivotTable["LastRace"] = lastYears
+
+pivot["TotalRaces"] = pivot[[2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015]].sum(axis=1)
+addLastRace(pivot)
 
 # Split data into training and eval
 cutoff = np.random.rand(len(pivot)) < TRAINING_THRESHOLD
 train = pivot[cutoff]
 test = pivot[~cutoff]
+
+# Get those who participanted in 2016 and those who did not
+#participated2016 = (train.xs(2016, axis=1, drop_level=False) == 1).as_matrix()
+#participantsIn2016 = train[participated2016]
+#nonParticipantsIn2016 = train[~participated2016]
+
+pivot.to_csv(OUTPUT_BASE + "out.csv")
