@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import random
 
 
-def getCSVAndFormat(CSVF_name):
+def getData(csv_file):
 	targetMatrix = []
 	temp = []
-	with open(CSVF_name,'rb') as csvfile:
+	with open(csv_file,'rb') as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
 			temp.append(row)
@@ -28,13 +28,13 @@ def getCSVAndFormat(CSVF_name):
 	return targetMatrix
 
 
-#Training 
-X = getCSVAndFormat('trainX.csv')
-Y = getCSVAndFormat('trainY.csv')
+# training data
+X = getData('output/training_x.csv')
+Y = getData('output/training_y.csv')
 
 #Validation
-Xval = getCSVAndFormat('valX.csv')
-Yval = getCSVAndFormat('valY.csv')
+X_validation = getData('output/test_x.csv')
+Y_validation = getData('output/test_y.csv')
 
 
 W = np.zeros(6)
@@ -49,7 +49,7 @@ def sigmoid(wT, x):
 	x = np.transpose(x)
 	wTx=np.dot(wT, x)
 	wTxScalar = np.asscalar(wTx)
-	sigmoid = 1/(1+np.exp(-wTxScalar)
+	sigmoid = 1/(1+np.exp(-wTxScalar))
 	return sigmoid
 
 # minimize cross-entropy error function
@@ -72,18 +72,23 @@ def error_derivative(W, X, Y):
 		sum = sum + partialProd
 	return sum
 
+def normalize(M):
+	normalized_matrix = (M - np.mean(M, axis=0)) / np.std(M, axis=0)
+	return normalized_matrix
+
 def gradient_descent(W, X, Y, alpha=0.0000001, tol=0.2):
-	#normalizing needs to go in here
-	log_likelihood = log_likelihood(W, X, Y)
+	X = normalize(X)
+	X = np.c_[np.ones(X.shape[0]),X]
+	log_likelihood = log_likelihood_func(W, X, Y)
 	iteration = 0
 	difference = 1
 	while(difference > tol):
 		previous_likelihood = log_likelihood
 		gradient = error_derivative(W, X, Y)
 		W = W + alpha*gradient
-		log_likelihood = log_likelihood(W, X, Y)
+		log_likelihood = log_likelihood_func(W, X, Y)
 		difference = np.abs(previous_likelihood - log_likelihood)
-		print "Iteration: " + str(i) + "Delta: " + str(difference) + "Error: " + str(log_likelihood)
+		print "Iteration: " + str(iteration) + "Delta: " + str(difference) + "Error: " + str(log_likelihood)
 		iteration+=1
 	return W
 
