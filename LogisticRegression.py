@@ -20,7 +20,8 @@ def getData(csv_file):
 	return formatted_matrix
 
 def create_float_matrix(data):
-	for entry in extracted_data:
+	formatted_matrix = []
+	for entry in data:
 		entry = [float(i) for i in entry]
 		entry.pop(0)
 		formatted_matrix.append(entry)
@@ -37,14 +38,15 @@ Y = getData('output/training_y.csv')
 X_validation = getData('output/test_x.csv')
 Y_validation = getData('output/test_y.csv')
 
-W = np.zeros(6)
+W = np.zeros(15)
 W = np.matrix(W)
 W = np.transpose(W)
 W = W.astype(np.float)
 
 output_matrix = []
 
-def sigmoid(wT, x):
+def sigmoid_func(wT, x):
+	sigmoid = 0.0
 	x = np.transpose(x)
 	wTx=np.dot(wT, x)
 	wTxScalar = np.asscalar(wTx)
@@ -52,11 +54,11 @@ def sigmoid(wT, x):
 	return sigmoid
 
 # minimize cross-entropy error function
-def log_likelihood(W, X, Y):
+def log_likelihood_func(W, X, Y):
 	log_likelihood = 0.0
 	wT = np.transpose(W)
 	for(x, y) in zip(X, Y):
-		sigmoid = sigmoid(wT, x)
+		sigmoid = sigmoid_func(wT, x)
 		y = np.asscalar(y)
 		log_likelihood += (y*np.log(sigmoid)+(1-y)*np.log(1-sigmoid))
 	return -log_likelihood
@@ -67,7 +69,7 @@ def error_derivative(W, X, Y):
 	wT = np.transpose(W)
 	for(x, y) in zip(X, Y):
 		xT = np.transpose(x)
-		partialProd = np.dot(xT, np.asscalar(y) - sigmoid(wT, x))
+		partialProd = np.dot(xT, np.asscalar(y) - sigmoid_func(wT, x))
 		sum = sum + partialProd
 	return sum
 
@@ -97,7 +99,7 @@ def print_metrics(W, X, Y):
 	correctComing = 0
 	guessComing = 0
 	wT = np.transpose(W)
-	log_likelihood = log_likelihood(W, X, Y)
+	log_likelihood = log_likelihood_func(W, X, Y)
 	for (xi, y) in zip(X, Y):
 		result = sigmoid(wT, xi)
 		if (result >= 0.5):
@@ -117,10 +119,10 @@ def print_metrics(W, X, Y):
 	#print_predicted_attendance(output_matrix, Y)
 
 def main(X, Y, W):
-	randomize = np.arange(len(x))
+	randomize = np.arange(len(X))
 	np.random.shuffle(randomize)
-	X = X[randomize]
-	Y = Y[randomize]
+	#X = X[randomize]
+	#Y = Y[randomize]
 
 	W = gradient_descent(W, X, Y)
 	print_metrics(W, X, Y)
