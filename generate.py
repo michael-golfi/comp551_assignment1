@@ -55,12 +55,16 @@ df[PARTICIPATED] = df[RANK].apply(lambda x: 1)
 pivot = df.pivot_table(index=[Id], columns=[YEAR], values=PARTICIPATED, fill_value=0)
 dedupes = df.groupby([Id]).last()
 avgRank = df.groupby([Id]).apply(lambda x: x[RANK].mean())
+avgTime = df.groupby([Id]).apply(lambda x: x[TIME].mean())
 
-pivot[AGE] = dedupes[AGE]
-pivot[SEX] = dedupes[SEX]
-pivot["MeanRank"] = avgRank.values
+dedupes[AGE] = dedupes[AGE].astype('category') \
+    .cat.codes.astype(int)
+pivot[AGE] = dedupes[AGE] / dedupes[AGE].max()
+pivot[SEX] = dedupes[SEX].apply(lambda x: 0 if x == 'M' else 1)
+pivot[RANK] = avgRank.values / avgRank.values.max()
+pivot[TIME] = avgRank.values / avgRank.values.max()
 
-pivot = pivot[[SEX, AGE, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, "MeanRank"]]
+pivot = pivot[[SEX, AGE, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, RANK, TIME]]
 
 def addLastRace(pivotTable):
     lastYears = []
@@ -77,7 +81,9 @@ def addLastRace(pivotTable):
 
 print "Finding total races per participants and last race participated in"
 pivot["TotalRaces"] = pivot[[2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015]].sum(axis=1)
+pivot["TotalRaces"] = pivot["TotalRaces"] / pivot["TotalRaces"].max()
 addLastRace(pivot)
+pivot["LastRace"] = pivot["LastRace"] / pivot["LastRace"].max()
 
 print "Splitting data to train and test sets"
 cutoff = np.random.rand(len(pivot)) < TRAINING_THRESHOLD
@@ -90,9 +96,9 @@ participantsIn2016 = train[participated2016]
 nonParticipantsIn2016 = train[~participated2016]
 
 print "Generating Training Data"
-train[[SEX, AGE, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, "MeanRank"]].to_csv(OUTPUT_BASE + "training_x.csv")
+train[[SEX, AGE, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, TIME, RANK,  "TotalRaces", "LastRace"]].to_csv(OUTPUT_BASE + "training_x.csv")
 train[2016].to_csv(OUTPUT_BASE + "training_y.csv")
 
 print "Generating Test Data"
-test[[SEX, AGE, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, "MeanRank"]].to_csv(OUTPUT_BASE + "test_x.csv")
+test[[SEX, AGE, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, TIME, RANK, "TotalRaces", "LastRace"]].to_csv(OUTPUT_BASE + "test_x.csv")
 test[2016].to_csv(OUTPUT_BASE + "test_y.csv")
