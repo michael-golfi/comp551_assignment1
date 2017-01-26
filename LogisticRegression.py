@@ -6,27 +6,28 @@ from decimal import *
 import matplotlib.pyplot as plt
 import random
 
-
 def getData(csv_file):
-	targetMatrix = []
-	temp = []
+	formatted_matrix = []
+	extracted_data = []
 	with open(csv_file,'rb') as csvfile:
 		reader = csv.reader(csvfile)
-		for row in reader:
-			temp.append(row)
+		for record in reader:
+			extracted_data.append(record)
 
-	temp = temp[1:]
+	extracted_data = extracted_data[1:]
+	formatted_matrix = create_float_matrix(extracted_data)
 
-	for entry in temp:
+	return formatted_matrix
+
+def create_float_matrix(data):
+	for entry in extracted_data:
 		entry = [float(i) for i in entry]
 		entry.pop(0)
-		targetMatrix.append(entry)
-
-	targetMatrix = np.matrix(targetMatrix)
-	targetMatrix = targetMatrix.astype(np.float)
-
-	return targetMatrix
-
+		formatted_matrix.append(entry)
+		
+	formatted_matrix = np.matrix(formatted_matrix)
+	formatted_matrix = formatted_matrix.astype(np.float)
+	return formatted_matrix
 
 # training data
 X = getData('output/training_x.csv')
@@ -36,14 +37,12 @@ Y = getData('output/training_y.csv')
 X_validation = getData('output/test_x.csv')
 Y_validation = getData('output/test_y.csv')
 
-
 W = np.zeros(6)
 W = np.matrix(W)
 W = np.transpose(W)
 W = W.astype(np.float)
 
-Z = []
-
+output_matrix = []
 
 def sigmoid(wT, x):
 	x = np.transpose(x)
@@ -102,10 +101,10 @@ def print_metrics(W, X, Y):
 	for (xi, y) in zip(X, Y):
 		result = sigmoid(wT, xi)
 		if (result >= 0.5):
-			Z.append(1)
+			output_matrix.append(1)
 			guessComing += 1
 		else:
-			Z.append(0)
+			output_matrix.append(0)
 			if result >= 0.5 and y==1:
 				correctComing += 1
 
@@ -115,10 +114,10 @@ def print_metrics(W, X, Y):
 	successrate = 100*(float(counter)/float(len(X)))
 	print "Guessed " + str(guessComing) + " are coming, " + str(correctComing) + " are correct."
 	print "Accuracy Rate: " + str(successrate) + "%"
-	#print_predicted_attendance(Z, Y)
+	#print_predicted_attendance(output_matrix, Y)
 
 def main(X, Y, W):
-	randomize = np.arrange(len(x))
+	randomize = np.arange(len(x))
 	np.random.shuffle(randomize)
 	X = X[randomize]
 	Y = Y[randomize]
