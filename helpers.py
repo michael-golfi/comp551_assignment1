@@ -26,11 +26,16 @@ def init_pandas(pd, np):
             .reset_index()
         return df[cols]
 
+    def reigel(df):
+        df["Time"] = df[df["Year"] == 2013]["Time"].apply(lambda x: x * 2**1.06)
+        return df
+
     pd.DataFrame.equals = equals
     pd.DataFrame.greater_than = greater_than
     pd.DataFrame.not_equals = not_equals
     pd.DataFrame.convert_time = convert_time
     pd.DataFrame.cut = cut
+    pd.DataFrame.reigel = reigel
     pd.DataFrame.remove_duplicate_runners = remove_duplicate_runners
 
 def save_groups(basePath, groups):

@@ -37,18 +37,19 @@ helpers.init_pandas(pd, np)
 print "Preprocessing data"
 # Remove Unknown genders, convert time to seconds and remove years earlier than 2007
 df = pd.read_csv(FILENAME, usecols=COLS) \
-    .not_equals(YEAR, 2013) \
     .not_equals(SEX, "U") \
     .convert_time() \
     .cut(AGE, AGE_BINS) \
     .remove_duplicate_runners(COLS)
-
+    #.greater_than(YEAR, 2007) \
 """ 
 Questions:
     a. Predict Y1 using logistic regression, optimized with gradient descent.
     b. Predict Y1 using a Naive Bayes classifier.
     c. Predict Y2 using linear regression, optimized in closed-form or with gradient descent (with or without regularization).
 """
+print "Remove year 2013"
+df = df[df[YEAR] != 2013]
 
 print "Pivot data to list participants and years participated"
 df[PARTICIPATED] = df[RANK].apply(lambda x: 1)
@@ -64,12 +65,14 @@ pivot[SEX] = dedupes[SEX].apply(lambda x: 0 if x == 'M' else 1)
 pivot[RANK] = avgRank.values / avgRank.values.max()
 pivot[TIME] = avgTime.values / avgTime.values.max()
 
+
 pivot = pivot[[SEX, AGE, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016, RANK, TIME]]
+
 
 def addLastRace(pivotTable):
     lastYears = []
     for record in pivotTable.iterrows():
-        lastYear = 1
+        lastYear = 0
         
         # Start from 2015 down since we need to test for 2016
         for year in [2016, 2015, 2014, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003]:
@@ -81,30 +84,9 @@ def addLastRace(pivotTable):
 
 print "Finding total races per participants and last race participated in"
 pivot["TotalRaces"] = pivot[[2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016]].sum(axis=1)
-pivot["TotalRaces"] = pivot["TotalRaces"]
+pivot["TotalRaces"] = pivot["TotalRaces"] / pivot["TotalRaces"].max()
 addLastRace(pivot)
-pivot["LastRace"] = pivot["LastRace"]
+pivot["LastRace"] = pivot["LastRace"] / pivot["LastRace"].max()
 
-print "Splitting data to train and test sets"
-cutoff = np.random.rand(len(pivot)) < TRAINING_THRESHOLD
-train = pivot[cutoff]
-test = pivot[~cutoff]
-
-pivot.to_csv(OUTPUT_BASE + "pivot.csv")
-
-print "Finding those who participanted in 2016 and those who did not"
-participated2016 = (train.xs(2016, axis=1, drop_level=False) == 1).as_matrix()
-participantsIn2016 = train[participated2016]
-nonParticipantsIn2016 = train[~participated2016]
-
-print "Generating Training Data"
-train[[SEX, AGE, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016, TIME, RANK,  "TotalRaces", "LastRace"]].to_csv(OUTPUT_BASE + "training_x.csv")
-#train[[AGE, 2015, "TotalRaces", RANK, "LastRace"]].to_csv(OUTPUT_BASE + "train_x.csv")
-train[2016].to_csv(OUTPUT_BASE + "train_y.csv")
-
-print "Generating Test Data"
-test[[SEX, AGE, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016, TIME, RANK, "TotalRaces", "LastRace"]].to_csv(OUTPUT_BASE + "test_x.csv")
-#test[[AGE, 2015, "TotalRaces", RANK, "LastRace"]].to_csv(OUTPUT_BASE + "test_x.csv")
-test[2016].to_csv(OUTPUT_BASE + "test_y.csv")
-
-print "Output full dataset"
+#Generating file for 2017 prediction
+pivot.to_csv(OUTPUT_BASE + "PREDICTION.csv")
