@@ -4,7 +4,7 @@ import math
 
 
 allColumns = [["Sex", "Age Category", "Rank", "Time", "TotalRaces"]]
-def gauss(x, mean, std):
+def gaussianDistribution(x, mean, std):
     return np.float64((1 / (math.sqrt(2 * math.pi) * std**2)) * math.exp(-((x-mean)**2/(2*std**2))))
 
 def predictDistribution(trueAvgStd, falseAvgStd, input):
@@ -17,14 +17,12 @@ def predictDistribution(trueAvgStd, falseAvgStd, input):
     for i in range(len(trueAvgStd)):
         mean,std = trueAvgStd[i]
         x = input[i]
-        res = gauss(x, mean, std)
-        
-        willParticipate *= res
+        willParticipate *= gaussianDistribution(x, mean, std)
 
     for i in range(len(falseAvgStd)):
         mean,std = falseAvgStd[i]
         x = input[i]
-        wontParticipate *= gauss(x, mean, std)
+        wontParticipate *= gaussianDistribution(x, mean, std)
 
     if willParticipate > wontParticipate:
         return 1
@@ -39,14 +37,14 @@ def runAll(trueAvgStd, falseAvgStd, instances):
     return results
 
 def calculateAccuracy(prediction, test):
-    trueInstances = 0
+    count = 0
     testSize = len(test)
     for i in range(testSize):
         if prediction[i] == test[i][-1]:
-            trueInstances += 1
+            count += 1
     
     # Return an accuracy in percent
-    return (trueInstances/float(testSize)) * 100.0
+    return count/float(testSize) * 100.0
 
 print "Loading training data"
 train_x = pd.read_csv("output/training_x.csv")
@@ -67,18 +65,18 @@ nonParticipants2015 = train_x[columns][~didParticipate].as_matrix()
 print "Zipped Averages and Standard Deviations as [(Average, StdDev), ...]"
 participatedAvg = participants2015.mean(axis=0)
 participatedStd = participants2015.std(axis=0, ddof=1)
-
 nonParticipatedAvg = participants2015.mean(axis=0)
 nonParticipatedStd = nonParticipants2015.std(axis=0, ddof=1)
-
 participatedVector = zip(participatedAvg, participatedStd)
 nonParticipatedVector = zip(nonParticipatedAvg, nonParticipatedStd)
 
 testX = test_x[columns].as_matrix()
 testY = test_y.as_matrix()
 
+print "Predict for 2016 results"
 results = runAll(participatedVector, nonParticipatedVector, testX)
-#print results
+
+print "Validate 2016 results"
 acc = calculateAccuracy(results, testY)
 print columns, acc
 
@@ -100,8 +98,8 @@ nonParticipatedStd = nonParticipants2016.std(axis=0, ddof=1)
 participatedVector = zip(participatedAvg, participatedStd)
 nonParticipatedVector = zip(nonParticipatedAvg, nonParticipatedStd)
 
+print "Predict for 2017 results"
 testX = predictionSet[columns].as_matrix()
-
 results = runAll(participatedVector, nonParticipatedVector, testX)
 print "Predictions for 2017"
 print results
