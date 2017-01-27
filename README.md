@@ -11,10 +11,16 @@ The preprocessing stage:
 - Organizes the ages into group ranges
 - Removes duplicates among years by averaging their results
 
-In order to generate the data for Y1:
+In order to generate the data for Y1-naive bayes:
 
 ```bash
-python generate.py
+python generate-naive.py
+```
+
+In order to generate the data for Y1-logistic regression:
+
+```bash
+python generate-logistic.py
 ```
 
 In order to generate the data for Y2:
@@ -32,13 +38,15 @@ python generate_PREDICTION.py
 
 ### Logistic Regression
 
+The files training_x.csv, training_y.csv, test_x.csv and test_y.csv must be available from the generate Y1-logistic step.
+
 ```bash
 python LogisticRegression.py
 ```
 
 ### Gaussian Naive Bayes
 
-The files train\_x.csv, train\_y.csv, test\_x.csv and test\_y.csv must be available from the generate Y1 step.
+The files train\_x.csv, train\_y.csv, test\_x.csv and test\_y.csv must be available from the generate Y1-naive step.
 
 ```bash
 python naive_bayes.py
