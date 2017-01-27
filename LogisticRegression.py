@@ -19,6 +19,7 @@ def getData(csv_file):
 		reader = csv.reader(csvfile)
 		for record in reader:
 			extracted_data.append(record)
+        # do not consider the first header row 
 	extracted_data = extracted_data[1:]
 	formatted_matrix = create_float_matrix(extracted_data)
 	return formatted_matrix
@@ -65,11 +66,11 @@ def log_likelihood_func(X, Y, W):
 		y = np.asscalar(y)
 		log_likelihood += ((y*np.log(sigmoid))+((1.0-y)*np.log(1.0-sigmoid)))
 	return -log_likelihood
-
+# gaussian normalization
 def normalize(M):
 	normalized_matrix = (M - np.mean(M, axis=0)) / np.std(M, axis=0)
 	return normalized_matrix
-
+# add weights of one to the matrix
 def addOnes(X):
 	X = np.c_[np.ones(X.shape[0]),X]
 	return X
@@ -85,15 +86,12 @@ def predict2017(W,X):
 		else:
 			predictions.append(1)
 
-	with open("PREDICTION.csv","w") as csvfile:
-		writer = csvfile.writer(fp,delimiter="\n")
-		writer.writerow(predictions)
-
 def gradient_descent(W, X, Y, alpha=.00015, tol=0.5):
 	iteration = 0
 	difference = 1
 	X = normalize(X)
 	X = addOnes(X)
+	# compute the error
 	log_likelihood = log_likelihood_func(X, Y, W)
 	while(difference > tol):
 		previous_likelihood = log_likelihood
@@ -119,5 +117,9 @@ def main(X, Y, W):
 	print Y
 	print W
 	predict2017(W, all_set)
+	
+	("PREDICTION.csv","w") as csvfile:
+		writer = csvfile.writer(fp,delimiter="\n")
+		writer.writerow(predictions)
 
 main(X, Y, W)
