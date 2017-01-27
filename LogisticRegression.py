@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-W = np.zeros(7)
+W = np.zeros(19)
 W = np.matrix(W)
 W = np.transpose(W)
 W = W.astype(np.float)
