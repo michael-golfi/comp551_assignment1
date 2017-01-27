@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-W = np.zeros(7)
+W = np.zeros(19)
 W = np.matrix(W)
 W = np.transpose(W)
 W = W.astype(np.float)
@@ -66,17 +66,6 @@ def log_likelihood_func(X, Y, W):
 		log_likelihood += ((y*np.log(sigmoid))+((1.0-y)*np.log(1.0-sigmoid)))
 	return -log_likelihood
 
-# deriviative of the log-likelihood function
-def error_derivative(X, Y, W):
-	sumOfVectors = 0.0
-	wT = np.transpose(W)
-	for(x, y) in zip(X, Y):
-		subtraction = np.asscalar(y) - sigmoid_func(wT, x)
-		xt = np.transpose(x)
-		partialGradProduct = np.dot(xt,subtraction)
-		sumOfVectors += partialGradProduct
-	return sumOfVectors
-
 def normalize(M):
 	normalized_matrix = (M - np.mean(M, axis=0)) / np.std(M, axis=0)
 	return normalized_matrix
@@ -100,7 +89,7 @@ def predict2017(W,X):
 		writer = csvfile.writer(fp,delimiter="\n")
 		writer.writerow(predictions)
 
-def gradient_descent(W, X, Y, alpha=.0001, tol=0.5):
+def gradient_descent(W, X, Y, alpha=.00015, tol=0.5):
 	iteration = 0
 	difference = 1
 	X = normalize(X)
@@ -108,7 +97,14 @@ def gradient_descent(W, X, Y, alpha=.0001, tol=0.5):
 	log_likelihood = log_likelihood_func(X, Y, W)
 	while(difference > tol):
 		previous_likelihood = log_likelihood
-		gradient = error_derivative(X, Y, W)
+		gradient = 0.0
+		wT = np.transpose(W)
+		# calculate the error derivative
+		for(x, y) in zip(X, Y):
+			xT = np.transpose(x)
+			partialGradProduct = np.dot(xT,np.asscalar(y) - sigmoid_func(wT, x))
+			gradient += partialGradProduct
+
 		W = W + alpha*gradient
 		log_likelihood = log_likelihood_func(X, Y, W)
 		training_error.append([iteration,log_likelihood])
